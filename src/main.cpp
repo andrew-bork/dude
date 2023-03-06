@@ -6,11 +6,37 @@
 int main(int argc, char * argv[]) {
 	
     Window w;
+    // w.fullscreen = true;
+    // w.borderless = true;
+    w.resizable = true;
     w.init("Game", 680, 430);
 	
 	SDL_Event event;	 // used to store any events from the OS
 	bool running = true; // used to determine if we're running the game
 	
+    
+    SDL_version linked;
+    SDL_GetVersion(&linked);
+    std::cout << "Linked with "
+              << std::to_string(linked.major)
+              << "." << std::to_string(linked.minor)
+              << "." << std::to_string(linked.patch) << std::endl;
+    //std::cout << linkedVal.str() << std::endl;
+
+    // setup SDL window
+
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+
+    SDL_GL_SetAttribute(
+        SDL_GL_CONTEXT_PROFILE_MASK,
+        SDL_GL_CONTEXT_PROFILE_CORE
+        );
+
+    std::cout << "[INFO] OpenGL renderer: "
+              << glGetString(GL_RENDERER)
+              << std::endl;
     
     auto now = std::chrono::steady_clock::now();
     auto then = std::chrono::steady_clock::now();

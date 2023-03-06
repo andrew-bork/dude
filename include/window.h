@@ -17,8 +17,8 @@ class Window {
 
         unsigned int width, height;
 
-
-        bool windowed = false;
+        bool resizable = false;
+        bool borderless = false;
         bool fullscreen = false;    //Settings
         bool vsync = true;
         bool ccw = true;

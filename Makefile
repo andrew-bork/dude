@@ -1,29 +1,36 @@
-
-# LINKER_FLAGS:=-lSDL2
-
-.PHONY: all
+.PHONY: all clean sdl
 
 all: bin/game bin/SDL3.dll
 	./bin/game
 
-bin/lSDL3.dll:
-	cp ./lib/SDL3.dll ./bin/SDL3.dll
+bin/SDL3.dll: bin
+	powershell cp lib/SDL3.dll bin/SDL3.dll
 
-IMGUI_SRCS:=${wildcard src/imgui/imgui_*.cpp}
-IMGUI_OBJS:=${patsubst src/imgui/%.cpp,build/%.o,${IMGUI_SRCS}}
-IMGUI_BACKEND_SRCS:=${wildcard src/imgui/backend/*.cpp}
-IMGUI_BACKEND_OBJS:=${patsubst src/imgui/backend/%.cpp,build/%.o,${IMGUI_SRCS}}
 test:
-	echo ${IMGUI_OBJS}
+	echo ${patsubst src/imgui/backend/%.cpp,build/%.o,${wildcard src/imgui/backend/*.cpp}}
 
-${IMGUI_OBJS}: build/%.o: src/imgui/%.cpp
-	g++ $^ -o $@ -Isrc 
-${IMGUI_BACKEND_OBJS}: build/%.o: src/imgui/backend/%.cpp
-	g++ $^ -o $@ -Isrc 
+bin:
+	mkdir bin
+build:
+	mkdir build
 
-# %.o: build/%.o
+IMGUI_OBJS:=${patsubst src/imgui/%.cpp,build/%.o,${wildcard src/imgui/*.cpp}}
 
-bin/game: ${wildcard src/*/*.cpp} ${wildcard src/*.cpp} src/imgui/backend/imgui_impl_opengl3.cpp src/imgui/backend/imgui_impl_SDL3.cpp
-	cp ./lib/SDL3.dll ./bin/SDL3.dll
-	g++ $^ -o $@ -L"C:\Users\Andrew\Documents\VSCode\dude\lib" -lSDL3 -Isrc -lopengl32 -lassimp-5 -Iinclude
+${patsubst src/imgui/backend/%.cpp,build/%.o,${wildcard src/imgui/backend/*.cpp}}:build/%.o:src/imgui/backend/%.cpp build
+	g++ -c -o $@ -Isrc -Iinclude ${filter %.cpp,$^}
+${IMGUI_OBJS}:build/%.o:src/imgui/%.cpp build
+	g++ -c -o $@ -Isrc -Iinclude ${filter %.cpp,$^}
 
+bin/game: ${IMGUI_OBJS} ${wildcard src/*.cpp} build/imgui_impl_opengl3.o build/imgui_impl_sdl3.o bin
+	g++ -o $@ -Iinclude ${filter %.cpp,$^} ${filter %.o,$^} -Llib -lSDL3 -Isrc -lOpengl32
+
+sdl:
+	git clone https://github.com/libsdl-org/SDL.git tmp/sdl
+	cmake -G "MinGW Makefiles" -D CMAKE_C_COMPILER=gcc -D CMAKE_CXX_COMPILER=g++ -S tmp/sdl -B tmp/sdl/build
+	echo "cd tmp/sdl/build;make;cd ../../.."
+	echo "cp tmp/sdl/build/SDL3.dll lib/SDL3.dll"
+
+clean:
+	-powershell rm -r bin
+	-powershell rm -r build
+	-powershell rm -r tmp
