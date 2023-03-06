@@ -24,6 +24,6 @@ ${IMGUI_BACKEND_OBJS}: build/%.o: src/imgui/backend/%.cpp
 # %.o: build/%.o
 
 bin/game: ${wildcard src/*/*.cpp} ${wildcard src/*.cpp} src/imgui/backend/imgui_impl_opengl3.cpp src/imgui/backend/imgui_impl_SDL3.cpp
-	
+	cp ./lib/SDL3.dll ./bin/SDL3.dll
 	g++ $^ -o $@ -L"C:\Users\Andrew\Documents\VSCode\dude\lib" -lSDL3 -Isrc -lopengl32 -lassimp-5 -Iinclude
 
