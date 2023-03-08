@@ -3,9 +3,6 @@
 all: bin/game bin/SDL3.dll
 	./bin/game
 
-bin/SDL3.dll: bin
-	powershell cp lib/SDL3.dll bin/SDL3.dll
-
 test:
 	echo ${patsubst src/imgui/backend/%.cpp,build/%.o,${wildcard src/imgui/backend/*.cpp}}
 
@@ -18,10 +15,17 @@ IMGUI_OBJS:=${patsubst src/imgui/%.cpp,build/%.o,${wildcard src/imgui/*.cpp}}
 
 ${patsubst src/imgui/backend/%.cpp,build/%.o,${wildcard src/imgui/backend/*.cpp}}:build/%.o:src/imgui/backend/%.cpp build
 	g++ -c -o $@ -Isrc -Iinclude ${filter %.cpp,$^}
+
 ${IMGUI_OBJS}:build/%.o:src/imgui/%.cpp build
 	g++ -c -o $@ -Isrc -Iinclude ${filter %.cpp,$^}
 
-bin/game: ${IMGUI_OBJS} ${wildcard src/*.cpp} build/imgui_impl_opengl3.o build/imgui_impl_sdl3.o bin
+${patsubst lib/%,bin/%,${wildcard lib/*.dll}}:bin/%:lib/%
+	-powershell cp lib/SDL3.dll bin/SDL3.dll
+
+build/glad.o: src/glad.c build
+	g++ -c -o $@ -Isrc -Iinclude ${filter %.c,$^}
+
+bin/game: ${IMGUI_OBJS} ${wildcard src/*.cpp} build/glad.o build/imgui_impl_opengl3.o build/imgui_impl_sdl3.o bin bin/SDL3.dll
 	g++ -o $@ -Iinclude ${filter %.cpp,$^} ${filter %.o,$^} -Llib -lSDL3 -Isrc -lOpengl32
 
 sdl:
