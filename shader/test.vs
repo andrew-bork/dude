@@ -1,7 +1,11 @@
-#version 330 core
+//fragmentColor=gl_Position*0.5+0.5;
+attribute vec4 position;
+uniform mat4 viewPort;
+uniform mat4 cameraRot;
+attribute vec4 colorBuffer;
+varying vec4 fragmentColor;
+void main(){
+    gl_Position=viewPort*cameraRot*position;
 
-layout(location = 0) in vec3 aPos;
-
-void main() {
-    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    fragmentColor=colorBuffer;
 }

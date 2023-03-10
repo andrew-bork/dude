@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SDL3/SDL.h>
-#include <glad/glad.h>
+// #include <glad/glad.h>
 
 #include <string>
 
@@ -14,7 +14,7 @@ class Window {
     public:
         SDL_Window* _window = NULL;
         ImGuiIO io;
-        SDL_GLContext gl_context;
+        SDL_GLContext glContext;
 
         unsigned int width, height;
 
@@ -26,11 +26,13 @@ class Window {
         unsigned int antialias = 16;
         float lineWidth = 1.0f;
         float pointSize = 1.0f;
-        void imgui_draw();
+        void imguiDraw();
         void render();
 
-        bool init(std::string window_name, int _width, int _height);
+        bool init(std::string windowName, int _width, int _height);
         void quit();
 
-        void process_event(const SDL_Event* event);
+        void updateGLSettings();
+
+        bool process_event(const SDL_Event* event);
 };

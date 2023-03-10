@@ -7,40 +7,13 @@
 #include <sstream>
 
 static int vertexShaderCount = 0, fragmentShaderCount = 0;
-Shader::Shader(ShaderType _type) {
-    type = _type;
-    switch(type){
-    case vertex:
-        vertexShaderCount++;
-        shaderName = "Vertex Shader #" + std::to_string(vertexShaderCount);
-        _handle = glCreateShader(GL_VERTEX_SHADER);
-        std::cout << "Created Vertex Shader \"" << shaderName << "\"" << std::endl;
-        break;
-    case fragment:
-        fragmentShaderCount++;
-        shaderName = "Fragment Shader #" + std::to_string(fragmentShaderCount);
-        _handle = glCreateShader(GL_FRAGMENT_SHADER);
-        std::cout << "Created Fragment Shader \"" << shaderName << "\"" << std::endl;
-        break;
-    } 
+Shader::Shader() {
+    type = none;
 }
 
-Shader::Shader(std::string _shaderName, ShaderType _type) {
-    type = _type;
-    switch(type){
-    case vertex:
-        vertexShaderCount++;
-        shaderName = _shaderName;
-        _handle = glCreateShader(GL_VERTEX_SHADER);
-        std::cout << "Created Vertex Shader \"" << shaderName << "\"" << std::endl;
-        break;
-    case fragment:
-        fragmentShaderCount++;
-        shaderName = _shaderName;
-        _handle = glCreateShader(GL_FRAGMENT_SHADER);
-        std::cout << "Created Fragment Shader \"" << shaderName << "\"" << std::endl;
-        break;
-    } 
+Shader::Shader(std::string _shaderName)  {
+    type = none;
+    shaderName = _shaderName;
 }
 
 Shader::~Shader() {
@@ -48,7 +21,18 @@ Shader::~Shader() {
     glDeleteShader(_handle);
 }
 
-void Shader::loadFromString(std::string _source) {
+GLuint shaderTypeLookup[] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
+
+void Shader::loadFromString(std::string _source, ShaderType _type) {
+    if(_type != type) {
+        glDeleteShader(_handle);
+        _handle = -1;
+    }
+    if(_handle == -1) {
+        type = _type;
+        _handle = glCreateShader(shaderTypeLookup[(int) type]);
+    }
+
     // Convert to cstring and send to shader
     source = _source;
     const char* tmp = source.c_str();
@@ -66,9 +50,19 @@ void Shader::loadFromString(std::string _source) {
         throw std::runtime_error("Failed to Compile Shader \""+shaderName+"\""+infoLog);
     }
 }
-void Shader::loadFromFile(std::string filename) {
+void Shader::loadFromFile(std::string filename, ShaderType _type) {
+    if(_type != type) {
+        glDeleteShader(_handle);
+        _handle = -1;
+    }
+    if(_handle == -1) {
+        type = _type;
+        _handle = glCreateShader(shaderTypeLookup[(int) type]);
+    }
+
     // Load from file
     std::ifstream f(filename);
+    if(!f.is_open()) throw std::runtime_error("Could not open \""+filename+"\". Maybe i don't have permissions or the file doesnt exist");
     std::stringstream buffer;
     buffer << f.rdbuf();
     source = buffer.str();
